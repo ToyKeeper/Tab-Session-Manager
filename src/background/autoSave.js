@@ -24,12 +24,36 @@ export const autoSaveRegular = async () => {
     if (!isChanged) return;
 
     await saveSession(session);
+    await uploadSessionWithExtremeJank(session);
     const limit = getSettings("autoSaveLimit");
     removeOverLimit("regular", limit);
   } catch (e) {
     log.error(logDir, "autoSaveRegular()", e);
   }
 };
+
+// no fancy cloud bullshit
+// no unreliable file exports under ~/Downloads/
+// just HTTP POST the session data to a simple server on localhost
+// so the server can save it to a file
+async function uploadSessionWithExtremeJank(session) {
+  log.log(logDir, "uploadSessionWithExtremeJank()", session);
+  const data = {
+    method: "POST",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(session)
+  };
+  // TODO: add a field for this to the options UI
+  const url = getSettings("uploadSessionWithExtremeJankURL")
+        || `http://localhost:4820/api/v1/session/post`;
+
+  const result = await fetch(url, data).catch(e => {
+    log.error(logDir, "uploadSessionWithExtremeJank()", e);
+  });
+  const resultJson = await result.json();
+  if (resultJson.error) log.error(logDir, "uploadSessionWithExtremeJank()", resultJson);
+  log.log(logDir, "=>uploadSessionWithExtremeJank()", resultJson);
+}
 
 //定期保存の設定が変更されたとき、起動・インストール時に自動保存のアラームをセット
 export async function setAutoSave(changes, areaName) {

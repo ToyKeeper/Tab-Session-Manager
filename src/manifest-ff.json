@@ -19,7 +19,8 @@
     "alarms"
   ],
   "optional_permissions": [
-    "https://www.googleapis.com/*"
+    "https://www.googleapis.com/*",
+    "http://localhost:4820/*"
   ],
   "options_ui": {
     "page": "options/index.html",
